@@ -10,6 +10,8 @@ import 'express-async-errors';
 import BaseRouter from './routes';
 import logger from '@shared/Logger';
 
+import cors from 'cors';
+
 import { ApolloServer } from 'apollo-server-express';
 import {typeDefs, resolvers} from './schema/schema';
 
@@ -20,6 +22,9 @@ const app = express();
 /************************************************************************************
  *                              Set basic express settings
  ***********************************************************************************/
+
+// Cors middleware
+app.use(cors())
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -34,6 +39,7 @@ if (process.env.NODE_ENV === 'development') {
 if (process.env.NODE_ENV === 'production') {
     app.use(helmet());
 }
+
 
 // Add APIs
 app.use('/api', BaseRouter);
