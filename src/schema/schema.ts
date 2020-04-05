@@ -28,6 +28,7 @@ export const typeDefs = gql`
     
     type Status {
         status: String!,
+        message: String,
     }
 
     type Query {
@@ -38,7 +39,7 @@ export const typeDefs = gql`
     type Mutation {
         addMessage(message: MessageInput!): Message!,
         addAuthor(author: AuthorInput!): Author!,
-        updateMessage(searchText: String!, newText: String!): Message!,
+        updateMessage(searchText: String!, newText: String!): Status!,
         deleteMessage(searchText: String!): Status!,
     }
 `;
@@ -65,21 +66,18 @@ export const resolvers = {
     },
     updateMessage: async (_: any, args: { searchText: string, newText: string }) => {
       try {
-        const doc = await Message.findOne({text: args.searchText}).exec() as Document & IMessage;
-        if (doc === null) return new Error(`Cannot find message with text ${args.searchText}`);
-
-        doc.text = args.newText;
-        return doc;
+        await Message.updateOne({text: args.searchText}, {text: args.newText});
+        return new Status('ok');
       } catch (e) {
-        return new Error(`Cannot update message: ${e.message}`);
+        return new Status('error', `Cannot update message: ${e.message}`);
       }
     },
     deleteMessage: async (_: any, args: { searchText: string}) => {
       try {
         await Message.deleteOne({ text: args.searchText }).exec();
-        return new Status('OK');
+        return new Status('ok');
       } catch (e) {
-        return new Error(`Cannot update message: ${e.message}`);
+        return new Status('error', `Cannot delete message: ${e.message}`);
       }
     }
   }
