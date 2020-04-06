@@ -1,12 +1,11 @@
 import {gql} from 'apollo-server-express';
 import {Message, IMessage} from '../models/message';
 import {Author, IAuthor} from '../models/author';
-import {text} from 'express';
-import {Document} from 'mongoose';
 import {Status} from '../../spec/Status';
 
 export const typeDefs = gql`
     type Message {
+        _id: ID!,
         text: String!,
         author: Author!,
         date: String!,
@@ -25,7 +24,7 @@ export const typeDefs = gql`
     input AuthorInput {
         name: String!,
     }
-    
+
     type Status {
         status: String!,
         message: String,
@@ -39,8 +38,8 @@ export const typeDefs = gql`
     type Mutation {
         addMessage(message: MessageInput!): Message!,
         addAuthor(author: AuthorInput!): Author!,
-        updateMessage(searchText: String!, newText: String!): Status!,
-        deleteMessage(searchText: String!): Status!,
+        updateMessage(id: String!, newText: String!): Status!,
+        deleteMessage(id: String!): Status!,
     }
 `;
 
@@ -64,17 +63,17 @@ export const resolvers = {
         return new Error(`Cannot create new author: ${e.message}`);
       }
     },
-    updateMessage: async (_: any, args: { searchText: string, newText: string }) => {
+    updateMessage: async (_: any, args: { id: string, newText: string }) => {
       try {
-        await Message.updateOne({text: args.searchText}, {text: args.newText});
+        await Message.updateOne({_id: args.id}, {text: args.newText});
         return new Status('ok');
       } catch (e) {
         return new Status('error', `Cannot update message: ${e.message}`);
       }
     },
-    deleteMessage: async (_: any, args: { searchText: string}) => {
+    deleteMessage: async (_: any, args: { id: string }) => {
       try {
-        await Message.deleteOne({ text: args.searchText }).exec();
+        await Message.deleteOne({_id: args.id}).exec();
         return new Status('ok');
       } catch (e) {
         return new Status('error', `Cannot delete message: ${e.message}`);

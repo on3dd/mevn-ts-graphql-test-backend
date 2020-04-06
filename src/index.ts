@@ -2,9 +2,10 @@ import './LoadEnv'; // Must be the first import
 import app from '@server';
 import logger from '@shared/Logger';
 
+
 import mongoose from 'mongoose';
-mongoose.Promise = global.Promise;
 import db from '../config/db';
+import autoIncrement from 'mongoose-auto-increment';
 
 // Start the server
 const port = Number(process.env.PORT || 3000);
